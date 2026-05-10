@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   ReddyExch Design System — CSS Custom Properties
+   4px baseline grid, clamp() responsive type scale
+   ============================================================ */
+
+:root {
+  /* --- Colors --- */
+  --color-white:    #FFFFFF;
+  --color-black:    #1A1A1A;
+  --color-red:      #FF3B30;   /* Hot Red — CTA / accent */
+  --color-success:  #10B981;
+  --color-warning:  #F59E0B;
+  --color-error:    #EF4444;
+
+  /* --- Typography --- */
+  --font-sans:       'Inter', system-ui, sans-serif;
+  --font-devanagari: 'Noto Sans Devanagari', sans-serif;
+
+  /* Type scale — clamp(min, preferred-vw, max) */
+  --text-xs:   clamp(0.75rem,  1.5vw, 0.875rem);
+  --text-sm:   clamp(0.875rem, 2vw,   1rem);
+  --text-base: clamp(1rem,     2.5vw, 1.125rem);
+  --text-lg:   clamp(1.125rem, 3vw,   1.25rem);
+  --text-xl:   clamp(1.25rem,  3.5vw, 1.5rem);
+  --text-2xl:  clamp(1.5rem,   4vw,   2rem);
+  --text-3xl:  clamp(1.875rem, 5vw,   2.5rem);
+  --text-4xl:  clamp(2.25rem,  6vw,   3rem);
+
+  /* --- Spacing (4px baseline grid) --- */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* --- Animation --- */
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 200ms;
+  --duration-base: 300ms;
+}
+
+/* ============================================================
+   GPU-accelerated micro-interactions
+   ============================================================ */
+.interactive {
+  transition: transform var(--duration-fast) var(--ease-out);
+  will-change: transform;
+  transform: translateZ(0);
+}
+.interactive:hover  { transform: scale(1.02) translateZ(0); }
+.interactive:active { transform: scale(0.98) translateZ(0); }
+
+/* ============================================================
+   WhatsApp CTA sticky pulse (2s loop)
+   ============================================================ */
+@keyframes wa-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); }
+  50%       { box-shadow: 0 0 0 12px rgba(255, 59, 48, 0); }
+}
+.wa-cta-sticky {
+  animation: wa-pulse 2s ease-out infinite;
+  will-change: box-shadow;
+}
+
+/* ============================================================
+   Hero cricket parallax float (CSS only, no JS library)
+   ============================================================ */
+@keyframes cricket-float {
+  0%, 100% { transform: translateY(0) translateZ(0); }
+  50%       { transform: translateY(-12px) translateZ(0); }
+}
+.hero-parallax-asset {
+  animation: cricket-float 4s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* ============================================================
+   Base resets
+   ============================================================ */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-white);
+  color: var(--color-black);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
