@@ -92,5 +92,20 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
   const { pingSitemapToGSC } = await import('@/lib/gsc-ping')
   pingSitemapToGSC('https://reddyexchgaming.com/sitemap.xml').catch(() => null)
 
+  // Auto-linker (non-blocking) — update body_html with internal links
+  try {
+    const { autoLink } = await import('@/lib/auto-linker')
+    const service2 = createServiceClient()
+    const { data: registry } = await service2.from('keyword_registry').select('id, keyword, slug, anchor_title, synonyms')
+    if (registry && registry.length > 0 && updated.body_raw) {
+      const linkedHtml = autoLink(updated.body_raw, registry)
+      const linkCount = (linkedHtml.match(/href="\/keyword\//g) ?? []).length
+      await service2.from('content_pages').update({
+        body_html: linkedHtml,
+        internal_links: linkCount,
+      }).eq('id', id)
+    }
+  } catch { /* auto-linker failure is non-blocking */ }
+
   return NextResponse.json({ page: updated, seoScore: seoResult.total })
 }

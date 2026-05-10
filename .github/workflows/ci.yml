@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main, staging, develop]
+  pull_request:
+    branches: [main, staging, develop]
+
+jobs:
+  build:
+    name: Build & Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Type check
+        run: npx tsc --noEmit
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://djirwwtijunzrpanfxwa.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SITE_URL: https://reddyexchgaming.com
+          NEXT_PUBLIC_WHATSAPP_NUMBER: '+919999999999'
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          AGE_GATE_EXIT_URL: https://www.google.com
+
+      - name: ESLint
+        run: npx next lint
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://djirwwtijunzrpanfxwa.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+          NEXT_PUBLIC_SITE_URL: https://reddyexchgaming.com
+          NEXT_PUBLIC_WHATSAPP_NUMBER: '+919999999999'
+          SUPABASE_SERVICE_ROLE_KEY: placeholder
+          AGE_GATE_EXIT_URL: https://www.google.com
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://djirwwtijunzrpanfxwa.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SITE_URL: https://reddyexchgaming.com
+          NEXT_PUBLIC_WHATSAPP_NUMBER: '+919999999999'
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          AGE_GATE_EXIT_URL: https://www.google.com
+
+      - name: Secret scan — no service key in public vars
+        run: |
+          if grep -r "NEXT_PUBLIC_SUPABASE_SERVICE" src/ --include="*.ts" --include="*.tsx"; then
+            echo "ERROR: Service role key found in public variable"
+            exit 1
+          fi
+          echo "Secret scan passed"
+
+  # Add GitHub secrets in repo Settings → Secrets:
+  # NEXT_PUBLIC_SUPABASE_ANON_KEY
+  # SUPABASE_SERVICE_ROLE_KEY

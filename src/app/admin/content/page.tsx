@@ -42,12 +42,17 @@ export default function ContentManagerPage() {
           <h1 className="text-2xl font-bold text-white">Content Manager</h1>
           <p className="text-white/50 text-sm mt-1">{pages.length} pages total</p>
         </div>
-        <Link
-          href="/admin/content/new"
-          className="bg-red-500 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-red-600 transition-colors"
-        >
-          + New Page
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/admin/content/calendar" className="text-white/50 hover:text-white text-sm px-3 py-2 rounded-lg hover:bg-white/10 transition-colors">
+            📅 Calendar
+          </Link>
+          <Link
+            href="/admin/content/new"
+            className="bg-red-500 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-red-600 transition-colors"
+          >
+            + New Page
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}
