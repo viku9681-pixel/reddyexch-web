@@ -4,6 +4,8 @@ import './globals.css'
 import StickyNav from '@/components/layout/StickyNav'
 import Footer from '@/components/layout/Footer'
 import StickyWhatsAppCTA from '@/components/cta/StickyWhatsAppCTA'
+import ComplianceOrchestrator from '@/components/compliance/ComplianceOrchestrator'
+import AnalyticsTracker from '@/components/analytics/AnalyticsTracker'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -46,7 +48,7 @@ export default function RootLayout({
       </head>
       <body className="bg-white text-black antialiased">
         {/* Compliance layer — renders GeoBlocker or AgeGate if needed */}
-        {/* <ComplianceOrchestrator /> — Phase 3 */}
+        <ComplianceOrchestrator />
 
         {/* Sticky navigation */}
         <StickyNav />
@@ -59,7 +61,8 @@ export default function RootLayout({
         {/* Sticky WhatsApp CTA — fixed bottom-right, z-40, pulse animation */}
         <StickyWhatsAppCTA />
 
-        {/* Analytics tracker — async, non-blocking — Phase 7 */}
+        {/* Analytics tracker — async, non-blocking */}
+        <AnalyticsTracker />
       </body>
     </html>
   )

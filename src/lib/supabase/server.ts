@@ -1,6 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+import { createClient } from '@supabase/supabase-js'
+
 /**
  * Server-side Supabase client — uses service role key for privileged operations.
  * NEVER expose SUPABASE_SERVICE_ROLE_KEY to the client.
@@ -14,8 +16,6 @@ export function createServiceClient() {
     throw new Error('Missing Supabase service role environment variables')
   }
 
-  // Use createClient from supabase-js directly for service role (bypasses RLS)
-  const { createClient } = require('@supabase/supabase-js')
   return createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false },
   })
