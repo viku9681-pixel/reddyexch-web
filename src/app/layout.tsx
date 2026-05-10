@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import StickyNav from '@/components/layout/StickyNav'
+import Footer from '@/components/layout/Footer'
+import StickyWhatsAppCTA from '@/components/cta/StickyWhatsAppCTA'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -34,15 +37,8 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <head>
         {/* Noto Sans Devanagari for Hindi content */}
-        <link
-          rel="preconnect"
-          href="https://fonts.googleapis.com"
-        />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap"
           rel="stylesheet"
@@ -50,21 +46,20 @@ export default function RootLayout({
       </head>
       <body className="bg-white text-black antialiased">
         {/* Compliance layer — renders GeoBlocker or AgeGate if needed */}
-        {/* <ComplianceOrchestrator /> — added in Phase 3 */}
+        {/* <ComplianceOrchestrator /> — Phase 3 */}
 
         {/* Sticky navigation */}
-        {/* <StickyNav /> — added in Phase 2 */}
+        <StickyNav />
 
         <main>{children}</main>
 
         {/* Footer with Responsible Gaming Module */}
-        {/* <Footer /> — added in Phase 2 */}
+        <Footer />
 
-        {/* Sticky WhatsApp CTA */}
-        {/* <StickyWhatsAppCTA /> — added in Phase 2 */}
+        {/* Sticky WhatsApp CTA — fixed bottom-right, z-40, pulse animation */}
+        <StickyWhatsAppCTA />
 
-        {/* Analytics tracker — async, non-blocking */}
-        {/* <AnalyticsTracker /> — added in Phase 7 */}
+        {/* Analytics tracker — async, non-blocking — Phase 7 */}
       </body>
     </html>
   )
