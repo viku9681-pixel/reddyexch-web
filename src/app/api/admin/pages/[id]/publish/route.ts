@@ -98,7 +98,16 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
     const service2 = createServiceClient()
     const { data: registry } = await service2.from('keyword_registry').select('id, keyword, slug, anchor_title, synonyms')
     if (registry && registry.length > 0 && updated.body_raw) {
-      const linkedHtml = autoLink(updated.body_raw, registry)
+      // Map snake_case DB fields to camelCase for auto-linker
+      const mappedRegistry = registry.map((r: { id: string; keyword: string; slug: string; anchor_title?: string; synonyms?: string[] }) => ({
+        id: r.id,
+        keyword: r.keyword,
+        slug: r.slug,
+        tier: 'secondary' as const,
+        anchorTitle: r.anchor_title,
+        synonyms: r.synonyms ?? [],
+      }))
+      const linkedHtml = autoLink(updated.body_raw, mappedRegistry)
       const linkCount = (linkedHtml.match(/href="\/keyword\//g) ?? []).length
       await service2.from('content_pages').update({
         body_html: linkedHtml,

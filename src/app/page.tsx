@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://reddyexchgaming.com',
   },
+  // LCP preload hint for hero section
+  other: {
+    'link-preload': '</og-image.jpg>; rel=preload; as=image',
+  },
 }
 
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '919999999999'

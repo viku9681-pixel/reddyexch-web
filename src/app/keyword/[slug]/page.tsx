@@ -60,17 +60,44 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       return {
         title: page.title,
         description: page.meta_desc,
-        alternates: { canonical: `${SITE_URL}/keyword/${slug}` },
+        alternates: {
+          canonical: `${SITE_URL}/keyword/${slug}`,
+          languages: {
+            'en-IN': `${SITE_URL}/keyword/${slug}`,
+          },
+        },
         robots: { index: true, follow: true },
+        openGraph: {
+          title: page.title,
+          description: page.meta_desc,
+          url: `${SITE_URL}/keyword/${slug}`,
+          type: 'article',
+          siteName: 'ReddyExch',
+          locale: 'en_IN',
+        },
       }
     }
   } catch { /* fallback */ }
 
   const keyword = slugToTitle(slug)
+  const title = `${keyword} | Get Your Gaming ID Instantly — ReddyExch`
+  const description = `Get your ${keyword.toLowerCase()} instantly via WhatsApp. ReddyExch provides gaming IDs for sports prediction platforms. 5-minute activation. 18+ only.`
   return {
-    title: `${keyword} | Get Your Gaming ID Instantly — ReddyExch`,
-    description: `Get your ${keyword.toLowerCase()} instantly via WhatsApp. ReddyExch provides gaming IDs for sports prediction platforms. 5-minute activation. 18+ only.`,
-    alternates: { canonical: `${SITE_URL}/keyword/${slug}` },
+    title,
+    description,
+    alternates: {
+      canonical: `${SITE_URL}/keyword/${slug}`,
+      languages: { 'en-IN': `${SITE_URL}/keyword/${slug}` },
+    },
+    robots: { index: true, follow: true },
+    openGraph: {
+      title,
+      description,
+      url: `${SITE_URL}/keyword/${slug}`,
+      type: 'article',
+      siteName: 'ReddyExch',
+      locale: 'en_IN',
+    },
   }
 }
 

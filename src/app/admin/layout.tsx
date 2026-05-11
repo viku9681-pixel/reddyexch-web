@@ -18,12 +18,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </Link>
           <nav className="hidden md:flex items-center gap-1">
             {[
-              { href: '/admin/content',      label: '📝 Content' },
-              { href: '/admin/analytics',    label: '📊 Analytics' },
-              { href: '/admin/rank-tracker', label: '📈 Rankings' },
-              { href: '/admin/audit-log',    label: '🔍 Audit Log' },
-              { href: '/admin/config',       label: '⚙️ Config' },
-              { href: '/admin/widgets',      label: '🧩 Widgets' },
+              { href: '/admin/content',          label: '📝 Content' },
+              { href: '/admin/content/calendar', label: '📅 Calendar' },
+              { href: '/admin/analytics',        label: '📊 Analytics' },
+              { href: '/admin/rank-tracker',     label: '📈 Rankings' },
+              { href: '/admin/audit-log',        label: '🔍 Audit Log' },
+              { href: '/admin/config',           label: '⚙️ Config' },
+              { href: '/admin/widgets',          label: '🧩 Widgets' },
             ].map(({ href, label }) => (
               <Link
                 key={href}
