@@ -188,9 +188,8 @@ export function scorePage(params: {
     })
   }
 
-  // ── 9. Structured Data (weight: 5) ──
-  const hasStructuredData = bodyHtml.includes('application/ld+json') || params.hasFaq !== undefined
-  const sdScore = 5 // Always give this — it's injected server-side
+  // Structured Data (weight: 5) — always injected server-side
+  const sdScore = 5
   const sdPass = true
 
   const total = Math.min(100, Math.round(

@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     if (finalSizeKb > 500) {
       return NextResponse.json({ error: 'Image cannot be compressed below 500 KB. Please use a smaller image.' }, { status: 422 })
     }
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Image processing failed' }, { status: 500 })
   }
 
@@ -58,8 +58,8 @@ export async function POST(request: NextRequest) {
   let width: number | undefined
   let height: number | undefined
   try {
-    const sharp = (await import('sharp')).default
-    const meta = await sharp(webpBuffer).metadata()
+    const sharp2 = (await import('sharp')).default
+    const meta = await sharp2(webpBuffer).metadata()
     width = meta.width
     height = meta.height
   } catch { /* dimensions optional */ }

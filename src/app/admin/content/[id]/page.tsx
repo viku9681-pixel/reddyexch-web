@@ -84,7 +84,6 @@ export default function ContentEditorPage() {
   const publish = async () => {
     setPublishing(true)
     setMessage(null)
-    // Save first
     await fetch(`/api/admin/pages/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -108,6 +107,12 @@ export default function ContentEditorPage() {
       setForm(prev => ({ ...prev, status: 'unpublished' }))
       setMessage({ type: 'success', text: 'Unpublished' })
     }
+  }
+
+  const deletePage = async () => {
+    if (!window.confirm('Delete this page permanently? This cannot be undone.')) return
+    await fetch(`/api/admin/pages/${id}`, { method: 'DELETE' })
+    router.push('/admin/content')
   }
 
   const field = (key: keyof typeof form, label: string, type: 'text' | 'textarea' | 'select' = 'text', options?: string[]) => (
@@ -149,7 +154,6 @@ export default function ContentEditorPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Link href="/admin/content" className="text-white/40 hover:text-white text-sm">← Content</Link>
@@ -180,7 +184,6 @@ export default function ContentEditorPage() {
         </div>
       </div>
 
-      {/* Message */}
       {message && (
         <div className={`mb-4 px-4 py-3 rounded-xl text-sm ${message.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
           {message.text}
@@ -188,7 +191,6 @@ export default function ContentEditorPage() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main editor */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4">
             <h2 className="text-white/70 text-xs font-semibold uppercase tracking-wider">SEO Fields</h2>
@@ -197,7 +199,6 @@ export default function ContentEditorPage() {
             {field('slug', 'URL Slug (e.g. online-cricket-id)')}
             {field('target_keyword', 'Target Keyword')}
           </div>
-
           <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4">
             <h2 className="text-white/70 text-xs font-semibold uppercase tracking-wider">Content</h2>
             {field('h1', 'H1 Heading (exact-match keyword)')}
@@ -205,9 +206,7 @@ export default function ContentEditorPage() {
           </div>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-4">
-          {/* Page settings */}
           <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4">
             <h2 className="text-white/70 text-xs font-semibold uppercase tracking-wider">Settings</h2>
             {field('page_type', 'Page Type', 'select', ['keyword_landing', 'content', 'pillar'])}
@@ -218,28 +217,18 @@ export default function ContentEditorPage() {
             </label>
           </div>
 
-          {/* SEO Score Panel */}
           <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-white/70 text-xs font-semibold uppercase tracking-wider">SEO Score</h2>
-              {seo && (
-                <span className={`text-2xl font-bold ${scoreColor(seo.total)}`}>{seo.total}/100</span>
-              )}
+              {seo && <span className={`text-2xl font-bold ${scoreColor(seo.total)}`}>{seo.total}/100</span>}
             </div>
-
             {!seo ? (
-              <p className="text-white/30 text-xs">Click "Score SEO" to analyse this page.</p>
+              <p className="text-white/30 text-xs">Click &quot;Score SEO&quot; to analyse this page.</p>
             ) : (
               <>
-                {/* Score bar */}
                 <div className="w-full bg-white/10 rounded-full h-2 mb-4">
-                  <div
-                    className={`h-2 rounded-full transition-all ${seo.total >= 70 ? 'bg-green-400' : seo.total >= 50 ? 'bg-yellow-400' : 'bg-red-400'}`}
-                    style={{ width: `${seo.total}%` }}
-                  />
+                  <div className={`h-2 rounded-full transition-all ${seo.total >= 70 ? 'bg-green-400' : seo.total >= 50 ? 'bg-yellow-400' : 'bg-red-400'}`} style={{ width: `${seo.total}%` }} />
                 </div>
-
-                {/* Criteria */}
                 <div className="space-y-2 mb-4">
                   {Object.entries(seo.breakdown).map(([key, val]) => (
                     <div key={key} className="flex items-center justify-between text-xs">
@@ -248,8 +237,6 @@ export default function ContentEditorPage() {
                     </div>
                   ))}
                 </div>
-
-                {/* Suggestions */}
                 {seo.suggestions.length > 0 && (
                   <div className="border-t border-white/10 pt-3 space-y-2">
                     <p className="text-white/50 text-xs font-medium">Improvements needed:</p>
@@ -261,7 +248,6 @@ export default function ContentEditorPage() {
                     ))}
                   </div>
                 )}
-
                 {seo.total >= 70 && (
                   <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-2 mt-2">
                     <p className="text-green-300 text-xs">✓ Ready to publish</p>
@@ -271,26 +257,13 @@ export default function ContentEditorPage() {
             )}
           </div>
 
-          {/* Quick links */}
           {!isNew && (
             <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-2">
               <h2 className="text-white/70 text-xs font-semibold uppercase tracking-wider mb-3">Actions</h2>
-              <a
-                href={form.page_type === 'keyword_landing' ? `/keyword/${form.slug}` : `/${form.slug}`}
-                target="_blank"
-                className="block text-white/50 hover:text-white text-sm py-1 transition-colors"
-              >
+              <a href={form.page_type === 'keyword_landing' ? `/keyword/${form.slug}` : `/${form.slug}`} target="_blank" className="block text-white/50 hover:text-white text-sm py-1 transition-colors">
                 ↗ View live page
               </a>
-              <button
-                onClick={() => {
-                  if (confirm('Delete this page permanently?')) {
-                    fetch(`/api/admin/pages/${id}`, { method: 'DELETE' })
-                      .then(() => router.push('/admin/content'))
-                  }
-                }}
-                className="block text-red-400/60 hover:text-red-400 text-sm py-1 transition-colors"
-              >
+              <button onClick={deletePage} className="block text-red-400/60 hover:text-red-400 text-sm py-1 transition-colors">
                 🗑 Delete page
               </button>
             </div>
