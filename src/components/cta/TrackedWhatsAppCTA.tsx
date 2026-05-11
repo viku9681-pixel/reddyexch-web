@@ -1,12 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 interface Props {
   slug: string
   keyword: string
   position: 'hero' | 'inline' | 'sticky-footer'
+  /** Phone number in E.164 format, e.g. "+919876543210". Passed from server component. */
+  phone: string
 }
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://reddyexchgaming.com'
 
 function getDeviceType(): 'mobile' | 'desktop' {
   if (typeof navigator === 'undefined') return 'desktop'
@@ -23,50 +27,37 @@ function getSessionId(): string {
   } catch { return 'anon' }
 }
 
-export default function TrackedWhatsAppCTA({ slug, keyword, position }: Props) {
-  const [waUrl, setWaUrl] = useState('#')
+function buildWaUrl(phone: string, slug: string): string {
+  const digits = phone.replace(/\D/g, '')
+  const pageUrl = `${SITE_URL}/keyword/${slug}`
+  const message = encodeURIComponent(`Hi, I want to get my Gaming ID — ${pageUrl}`)
+  const device = getDeviceType()
+  return device === 'mobile'
+    ? `https://wa.me/${digits}?text=${message}`
+    : `https://web.whatsapp.com/send?phone=${digits}&text=${message}`
+}
 
+export default function TrackedWhatsAppCTA({ slug, keyword, position, phone }: Props) {
+  const linkRef = useRef<HTMLAnchorElement>(null)
+
+  // Update href on client after hydration to pick up correct device type
   useEffect(() => {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://reddyexchgaming.com'
-    const pageUrl = `${siteUrl}/keyword/${slug}`
-    const message = encodeURIComponent(`Hi, I want to get my Gaming ID — ${pageUrl}`)
-    const device = getDeviceType()
-
-    // Fetch live number from DB via public API — falls back to env var if unavailable
-    fetch('/api/config')
-      .then(r => r.json())
-      .then(d => {
-        const phone = (d.whatsapp_number ?? process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '919999999999').replace(/\D/g, '')
-        const url = device === 'mobile'
-          ? `https://wa.me/${phone}?text=${message}`
-          : `https://web.whatsapp.com/send?phone=${phone}&text=${message}`
-        setWaUrl(url)
-      })
-      .catch(() => {
-        // Fallback to env var if API fails
-        const phone = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '919999999999').replace(/\D/g, '')
-        const url = device === 'mobile'
-          ? `https://wa.me/${phone}?text=${message}`
-          : `https://web.whatsapp.com/send?phone=${phone}&text=${message}`
-        setWaUrl(url)
-      })
-  }, [slug])
+    if (linkRef.current) {
+      linkRef.current.href = buildWaUrl(phone, slug)
+    }
+  }, [phone, slug])
 
   const handleClick = () => {
     try {
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://reddyexchgaming.com'
-      const pageUrl = `${siteUrl}/keyword/${slug}`
-      const sessionId = getSessionId()
-      const deviceType = getDeviceType()
-
+      const pageUrl = `${SITE_URL}/keyword/${slug}`
       fetch('/api/analytics/event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           event: 'whatsapp_cta_click',
           page_url: pageUrl,
-          session_id: sessionId,
-          device_type: deviceType,
+          session_id: getSessionId(),
+          device_type: getDeviceType(),
           cta_position: position,
           timestamp: new Date().toISOString(),
         }),
@@ -74,9 +65,17 @@ export default function TrackedWhatsAppCTA({ slug, keyword, position }: Props) {
     } catch { /* never block the click */ }
   }
 
+  // Server-render with mobile URL as default (most traffic is mobile)
+  // useEffect above corrects it for desktop after hydration
+  const digits = phone.replace(/\D/g, '')
+  const pageUrl = `${SITE_URL}/keyword/${slug}`
+  const message = encodeURIComponent(`Hi, I want to get my Gaming ID — ${pageUrl}`)
+  const defaultHref = `https://wa.me/${digits}?text=${message}`
+
   return (
     <a
-      href={waUrl}
+      ref={linkRef}
+      href={defaultHref}
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleClick}

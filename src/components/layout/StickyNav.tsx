@@ -4,7 +4,11 @@ import Link from 'next/link'
 import { useState } from 'react'
 import NavWhatsAppCTA from './NavWhatsAppCTA'
 
-export default function StickyNav() {
+interface StickyNavProps {
+  phone: string
+}
+
+export default function StickyNav({ phone }: StickyNavProps) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
@@ -41,12 +45,12 @@ export default function StickyNav() {
 
         {/* Desktop WhatsApp CTA */}
         <div className="hidden md:block">
-          <NavWhatsAppCTA />
+          <NavWhatsAppCTA phone={phone} />
         </div>
 
         {/* Mobile: hamburger + WhatsApp icon */}
         <div className="flex md:hidden items-center gap-3">
-          <NavWhatsAppCTA mobile />
+          <NavWhatsAppCTA mobile phone={phone} />
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="text-white p-2 interactive"

@@ -1,7 +1,14 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef } from 'react'
+
+interface Props {
+  /** Phone number in E.164 format, e.g. "+919876543210". Passed from server layout. */
+  phone: string
+}
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://reddyexchgaming.com'
 
 function getSessionId(): string {
   try {
@@ -13,43 +20,28 @@ function getSessionId(): string {
   } catch { return 'anon' }
 }
 
-export default function StickyWhatsAppCTA() {
+export default function StickyWhatsAppCTA({ phone }: Props) {
   const pathname = usePathname()
-  const [waUrl, setWaUrl] = useState('#')
+  const linkRef = useRef<HTMLAnchorElement>(null)
+  const digits = phone.replace(/\D/g, '')
 
   useEffect(() => {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://reddyexchgaming.com'
-    const message = encodeURIComponent(`Hi, I want to get my Gaming ID — ${siteUrl}${pathname}`)
+    if (!linkRef.current) return
+    const message = encodeURIComponent(`Hi, I want to get my Gaming ID — ${SITE_URL}${pathname}`)
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
-
-    // Fetch live number from DB via public API — falls back to env var if unavailable
-    fetch('/api/config')
-      .then(r => r.json())
-      .then(d => {
-        const phone = (d.whatsapp_number ?? process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '919999999999').replace(/\D/g, '')
-        const url = isMobile
-          ? `https://wa.me/${phone}?text=${message}`
-          : `https://web.whatsapp.com/send?phone=${phone}&text=${message}`
-        setWaUrl(url)
-      })
-      .catch(() => {
-        const phone = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '919999999999').replace(/\D/g, '')
-        const url = isMobile
-          ? `https://wa.me/${phone}?text=${message}`
-          : `https://web.whatsapp.com/send?phone=${phone}&text=${message}`
-        setWaUrl(url)
-      })
-  }, [pathname])
+    linkRef.current.href = isMobile
+      ? `https://wa.me/${digits}?text=${message}`
+      : `https://web.whatsapp.com/send?phone=${digits}&text=${message}`
+  }, [pathname, digits])
 
   const handleClick = () => {
     try {
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://reddyexchgaming.com'
       fetch('/api/analytics/event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           event: 'whatsapp_cta_click',
-          page_url: `${siteUrl}${pathname}`,
+          page_url: `${SITE_URL}${pathname}`,
           session_id: getSessionId(),
           device_type: /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
           cta_position: 'sticky-footer',
@@ -59,9 +51,14 @@ export default function StickyWhatsAppCTA() {
     } catch { /* never block */ }
   }
 
+  // Default href for SSR — mobile URL (most traffic is mobile)
+  const defaultMessage = encodeURIComponent(`Hi, I want to get my Gaming ID — ${SITE_URL}`)
+  const defaultHref = `https://wa.me/${digits}?text=${defaultMessage}`
+
   return (
     <a
-      href={waUrl}
+      ref={linkRef}
+      href={defaultHref}
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleClick}

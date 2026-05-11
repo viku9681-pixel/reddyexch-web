@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { getWhatsAppNumber } from '@/lib/get-whatsapp-number'
 
 export const revalidate = 60
 
@@ -16,13 +17,12 @@ export const metadata: Metadata = {
   },
 }
 
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '919999999999'
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://reddyexchgaming.com'
 
-function buildWAUrl(source: string) {
-  const phone = WHATSAPP_NUMBER.replace(/\D/g, '')
+function buildWAUrl(phone: string, source: string) {
+  const digits = phone.replace(/\D/g, '')
   const message = encodeURIComponent(`Hi, I want to get my Gaming ID — ${SITE_URL}${source}`)
-  return `https://wa.me/${phone}?text=${message}`
+  return `https://wa.me/${digits}?text=${message}`
 }
 
 const PARTNERS = [
@@ -93,8 +93,9 @@ const OFFERS = [
   },
 ]
 
-export default function HomePage() {
-  const waUrl = buildWAUrl('/')
+export default async function HomePage() {
+  const waPhone = await getWhatsAppNumber()
+  const waUrl = buildWAUrl(waPhone, '/')
 
   return (
     <>

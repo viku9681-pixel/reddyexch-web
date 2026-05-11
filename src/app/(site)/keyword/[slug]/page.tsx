@@ -7,6 +7,7 @@ import { generateStructuredData } from '@/lib/structured-data'
 import SEOHead from '@/components/seo/SEOHead'
 import { createServiceClient } from '@/lib/supabase/server'
 import TrackedWhatsAppCTA from '@/components/cta/TrackedWhatsAppCTA'
+import { getWhatsAppNumber } from '@/lib/get-whatsapp-number'
 
 export const revalidate = 60
 
@@ -104,19 +105,24 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function KeywordLandingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  // Try to load from DB first
+  // Fetch WhatsApp number and page content in parallel
   let page: { title: string; meta_desc: string; h1: string; body_html: string; target_keyword: string; has_faq: boolean } | null = null
 
-  try {
-    const service = createServiceClient()
-    const { data } = await service
-      .from('content_pages')
-      .select('title, meta_desc, h1, body_html, target_keyword, has_faq, page_type')
-      .eq('slug', slug)
-      .eq('status', 'published')
-      .single()
-    page = data
-  } catch { /* fallback to generated content */ }
+  const [waPhone] = await Promise.all([
+    getWhatsAppNumber(),
+    (async () => {
+      try {
+        const service = createServiceClient()
+        const { data } = await service
+          .from('content_pages')
+          .select('title, meta_desc, h1, body_html, target_keyword, has_faq, page_type')
+          .eq('slug', slug)
+          .eq('status', 'published')
+          .single()
+        page = data
+      } catch { /* fallback to generated content */ }
+    })(),
+  ])
 
   // If not in DB and not in known slugs, 404
   if (!page && !KEYWORD_SLUGS.includes(slug)) notFound()
@@ -145,7 +151,7 @@ export default async function KeywordLandingPage({ params }: { params: Promise<{
             ReddyExch provides gaming IDs for online sports prediction and fantasy participation platforms.
             Get your {keyword.toLowerCase()} in 5 minutes via WhatsApp — no paperwork, no waiting.
           </p>
-          <TrackedWhatsAppCTA slug={slug} keyword={keyword} position="hero" />
+          <TrackedWhatsAppCTA slug={slug} keyword={keyword} position="hero" phone={waPhone} />
           <p className="text-white/40 text-sm mt-3">
             ✓ 5-minute activation &nbsp;·&nbsp; ✓ 18+ only &nbsp;·&nbsp; ✓ Not available in Telangana &amp; AP
           </p>
@@ -187,7 +193,7 @@ export default async function KeywordLandingPage({ params }: { params: Promise<{
           <div className="bg-black rounded-2xl p-8 text-center mt-10">
             <h3 className="text-white text-xl font-bold mb-2">Ready to Get Your {keyword}?</h3>
             <p className="text-white/60 text-sm mb-6">Contact us on WhatsApp and get your gaming ID in 5 minutes.</p>
-            <TrackedWhatsAppCTA slug={slug} keyword={keyword} position="inline" />
+            <TrackedWhatsAppCTA slug={slug} keyword={keyword} position="inline" phone={waPhone} />
           </div>
         </div>
       </section>
