@@ -105,12 +105,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function KeywordLandingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  // Fetch WhatsApp number and page content in parallel
-  let page: { title: string; meta_desc: string; h1: string; body_html: string; target_keyword: string; has_faq: boolean } | null = null
+  type PageData = { title: string; meta_desc: string; h1: string; body_html: string; target_keyword: string; has_faq: boolean } | null
 
-  const [waPhone] = await Promise.all([
+  // Fetch WhatsApp number and page content in parallel
+  const [waPhone, page] = await Promise.all([
     getWhatsAppNumber(),
-    (async () => {
+    (async (): Promise<PageData> => {
       try {
         const service = createServiceClient()
         const { data } = await service
@@ -119,8 +119,8 @@ export default async function KeywordLandingPage({ params }: { params: Promise<{
           .eq('slug', slug)
           .eq('status', 'published')
           .single()
-        page = data
-      } catch { /* fallback to generated content */ }
+        return data ?? null
+      } catch { return null }
     })(),
   ])
 
