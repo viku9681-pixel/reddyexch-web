@@ -18,14 +18,27 @@ export default function StickyWhatsAppCTA() {
   const [waUrl, setWaUrl] = useState('#')
 
   useEffect(() => {
-    const phone = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '919999999999').replace(/\D/g, '')
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://reddyexchgaming.com'
     const message = encodeURIComponent(`Hi, I want to get my Gaming ID — ${siteUrl}${pathname}`)
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
-    const url = isMobile
-      ? `https://wa.me/${phone}?text=${message}`
-      : `https://web.whatsapp.com/send?phone=${phone}&text=${message}`
-    setWaUrl(url)
+
+    // Fetch live number from DB via public API — falls back to env var if unavailable
+    fetch('/api/config')
+      .then(r => r.json())
+      .then(d => {
+        const phone = (d.whatsapp_number ?? process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '919999999999').replace(/\D/g, '')
+        const url = isMobile
+          ? `https://wa.me/${phone}?text=${message}`
+          : `https://web.whatsapp.com/send?phone=${phone}&text=${message}`
+        setWaUrl(url)
+      })
+      .catch(() => {
+        const phone = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '919999999999').replace(/\D/g, '')
+        const url = isMobile
+          ? `https://wa.me/${phone}?text=${message}`
+          : `https://web.whatsapp.com/send?phone=${phone}&text=${message}`
+        setWaUrl(url)
+      })
   }, [pathname])
 
   const handleClick = () => {

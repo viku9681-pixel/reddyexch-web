@@ -46,7 +46,7 @@ export type ComplianceAction =
   | 'create' | 'edit' | 'publish' | 'unpublish' | 'delete' | 'config_change'
   | 'age_gate_confirmed' | 'age_gate_declined' | 'geo_block_triggered' | 'compliance_export'
 
-export type ComplianceResourceType = 'article' | 'keyword' | 'widget_config' | 'session' | 'export'
+export type ComplianceResourceType = 'article' | 'keyword' | 'widget_config' | 'platform_config' | 'session' | 'export'
 
 export interface ComplianceLog {
   id: number

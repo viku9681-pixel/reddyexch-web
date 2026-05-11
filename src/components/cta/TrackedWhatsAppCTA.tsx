@@ -27,15 +27,29 @@ export default function TrackedWhatsAppCTA({ slug, keyword, position }: Props) {
   const [waUrl, setWaUrl] = useState('#')
 
   useEffect(() => {
-    const phone = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '919999999999').replace(/\D/g, '')
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://reddyexchgaming.com'
     const pageUrl = `${siteUrl}/keyword/${slug}`
     const message = encodeURIComponent(`Hi, I want to get my Gaming ID — ${pageUrl}`)
     const device = getDeviceType()
-    const url = device === 'mobile'
-      ? `https://wa.me/${phone}?text=${message}`
-      : `https://web.whatsapp.com/send?phone=${phone}&text=${message}`
-    setWaUrl(url)
+
+    // Fetch live number from DB via public API — falls back to env var if unavailable
+    fetch('/api/config')
+      .then(r => r.json())
+      .then(d => {
+        const phone = (d.whatsapp_number ?? process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '919999999999').replace(/\D/g, '')
+        const url = device === 'mobile'
+          ? `https://wa.me/${phone}?text=${message}`
+          : `https://web.whatsapp.com/send?phone=${phone}&text=${message}`
+        setWaUrl(url)
+      })
+      .catch(() => {
+        // Fallback to env var if API fails
+        const phone = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '919999999999').replace(/\D/g, '')
+        const url = device === 'mobile'
+          ? `https://wa.me/${phone}?text=${message}`
+          : `https://web.whatsapp.com/send?phone=${phone}&text=${message}`
+        setWaUrl(url)
+      })
   }, [slug])
 
   const handleClick = () => {
